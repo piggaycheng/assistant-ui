@@ -5,3 +5,4 @@ export { ComposerPrimitiveCancel as Cancel } from "./ComposerCancel";
 export { ComposerPrimitiveAddAttachment as AddAttachment } from "./ComposerAddAttachment";
 export { ComposerPrimitiveAttachments as Attachments } from "./ComposerAttachments";
 export { ComposerPrimitiveIf as If } from "./ComposerIf";
+export { ComposerPrimitiveRecord as Record } from "./ComposerRecord"

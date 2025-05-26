@@ -17,8 +17,7 @@ const isAttachmentComplete = (a: Attachment): a is CompleteAttachment =>
 
 export abstract class BaseComposerRuntimeCore
   extends BaseSubscribable
-  implements ComposerRuntimeCore
-{
+  implements ComposerRuntimeCore {
   public readonly isEditing = true;
 
   protected abstract getAttachmentAdapter(): AttachmentAdapter | undefined;
@@ -125,12 +124,12 @@ export abstract class BaseComposerRuntimeCore
     const attachments =
       adapter && this.attachments.length > 0
         ? await Promise.all(
-            this.attachments.map(async (a) => {
-              if (isAttachmentComplete(a)) return a;
-              const result = await adapter.send(a);
-              return result as CompleteAttachment;
-            }),
-          )
+          this.attachments.map(async (a) => {
+            if (isAttachmentComplete(a)) return a;
+            const result = await adapter.send(a);
+            return result as CompleteAttachment;
+          }),
+        )
         : [];
 
     const message: Omit<AppendMessage, "parentId" | "sourceId"> = {
@@ -234,5 +233,35 @@ export abstract class BaseComposerRuntimeCore
       if (!subscribers) return;
       subscribers.delete(callback);
     };
+  }
+
+  private _recorder: MediaRecorder | undefined;
+  public get recorder(): MediaRecorder | undefined {
+    return this._recorder;
+  }
+
+  public setRecorder(recording: MediaRecorder) {
+    this._recorder = recording;
+    this._notifySubscribers();
+  };
+
+  public removeRecorder() {
+    this._recorder = undefined;
+    this._notifySubscribers();
+  }
+
+  private _audioChunks: Blob[] = [];
+  public get audioChunks() {
+    return this._audioChunks;
+  }
+
+  public setAudioChunks(audioChunks: Blob[]) {
+    this._audioChunks = audioChunks;
+    this._notifySubscribers();
+  }
+
+  public resetAudioChunks() {
+    this._audioChunks = [];
+    this._notifySubscribers();
   }
 }

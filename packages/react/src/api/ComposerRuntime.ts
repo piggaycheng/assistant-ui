@@ -43,6 +43,8 @@ type BaseComposerState = {
   readonly role: MessageRole;
   readonly attachments: readonly Attachment[];
   readonly runConfig: RunConfig;
+
+  readonly recorder: MediaRecorder | undefined;
 };
 
 export type ThreadComposerState = BaseComposerState & {
@@ -75,6 +77,9 @@ const getThreadComposerState = (
     runConfig: runtime?.runConfig ?? EMPTY_OBJECT,
 
     value: runtime?.text ?? "",
+
+    recorder: runtime?.recorder ?? undefined,
+    audioChunks: runtime?.audioChunks ?? []
   });
 };
 
@@ -94,6 +99,9 @@ const getEditComposerState = (
     runConfig: runtime?.runConfig ?? EMPTY_OBJECT,
 
     value: runtime?.text ?? "",
+
+    recorder: runtime?.recorder ?? undefined,
+    audioChunks: runtime?.audioChunks ?? []
   });
 };
 
@@ -170,6 +178,10 @@ export type ComposerRuntime = {
    * @param idx The index of the attachment to get.
    */
   getAttachmentByIndex(idx: number): AttachmentRuntime;
+
+  setRecorder(recorder: MediaRecorder): void;
+
+  setAudioChunks(chunks: Blob[]): void;
 };
 
 export abstract class ComposerRuntimeImpl implements ComposerRuntime {
@@ -179,7 +191,7 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
 
   public abstract get type(): "edit" | "thread";
 
-  constructor(protected _core: ComposerRuntimeCoreBinding) {}
+  constructor(protected _core: ComposerRuntimeCoreBinding) { }
 
   protected __internal_bindMethods() {
     this.setText = this.setText.bind(this);
@@ -195,6 +207,8 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
     this.getAttachmentAccept = this.getAttachmentAccept.bind(this);
     this.getAttachmentByIndex = this.getAttachmentByIndex.bind(this);
     this.unstable_on = this.unstable_on.bind(this);
+    this.setRecorder = this.setRecorder.bind(this);
+    this.setAudioChunks = this.setAudioChunks.bind(this);
   }
 
   public abstract getState(): ComposerState;
@@ -278,6 +292,18 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
   }
 
   public abstract getAttachmentByIndex(idx: number): AttachmentRuntime;
+
+  public setRecorder(recording: MediaRecorder): void {
+    const core = this._core.getState();
+    if (!core) throw new Error("Composer is not available");
+    core.setRecorder(recording);
+  }
+
+  public setAudioChunks(chunks: Blob[]): void {
+    const core = this._core.getState();
+    if (!core) throw new Error("Composer is not available");
+    core.setAudioChunks(chunks);
+  }
 }
 
 export type ThreadComposerRuntime = Omit<
@@ -295,8 +321,7 @@ export type ThreadComposerRuntime = Omit<
 
 export class ThreadComposerRuntimeImpl
   extends ComposerRuntimeImpl
-  implements ThreadComposerRuntime
-{
+  implements ThreadComposerRuntime {
   public override get path() {
     return this._core.path as ComposerRuntimePath & {
       composerSource: "thread";
@@ -370,8 +395,7 @@ export type EditComposerRuntime = Omit<
 
 export class EditComposerRuntimeImpl
   extends ComposerRuntimeImpl
-  implements EditComposerRuntime
-{
+  implements EditComposerRuntime {
   public override get path() {
     return this._core.path as ComposerRuntimePath & { composerSource: "edit" };
   }
