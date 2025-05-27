@@ -37,11 +37,8 @@ export type ComposerRuntimeCore = Readonly<{
     callback: () => void,
   ) => Unsubscribe;
 
-  recorder: MediaRecorder | undefined;
-  setRecorder: (recording: MediaRecorder) => void;
-
-  audioChunks: Blob[];
-  setAudioChunks: (audioChunks: Blob[]) => void;
+  startRecord: () => void;
+  stopRecord: () => void;
 }>;
 
 export type ThreadComposerRuntimeCore = ComposerRuntimeCore &

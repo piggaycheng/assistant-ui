@@ -43,8 +43,6 @@ type BaseComposerState = {
   readonly role: MessageRole;
   readonly attachments: readonly Attachment[];
   readonly runConfig: RunConfig;
-
-  readonly recorder: MediaRecorder | undefined;
 };
 
 export type ThreadComposerState = BaseComposerState & {
@@ -77,9 +75,6 @@ const getThreadComposerState = (
     runConfig: runtime?.runConfig ?? EMPTY_OBJECT,
 
     value: runtime?.text ?? "",
-
-    recorder: runtime?.recorder ?? undefined,
-    audioChunks: runtime?.audioChunks ?? []
   });
 };
 
@@ -99,9 +94,6 @@ const getEditComposerState = (
     runConfig: runtime?.runConfig ?? EMPTY_OBJECT,
 
     value: runtime?.text ?? "",
-
-    recorder: runtime?.recorder ?? undefined,
-    audioChunks: runtime?.audioChunks ?? []
   });
 };
 
@@ -179,9 +171,8 @@ export type ComposerRuntime = {
    */
   getAttachmentByIndex(idx: number): AttachmentRuntime;
 
-  setRecorder(recorder: MediaRecorder): void;
-
-  setAudioChunks(chunks: Blob[]): void;
+  startRecord(): void;
+  stopRecord(): void;
 };
 
 export abstract class ComposerRuntimeImpl implements ComposerRuntime {
@@ -207,8 +198,8 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
     this.getAttachmentAccept = this.getAttachmentAccept.bind(this);
     this.getAttachmentByIndex = this.getAttachmentByIndex.bind(this);
     this.unstable_on = this.unstable_on.bind(this);
-    this.setRecorder = this.setRecorder.bind(this);
-    this.setAudioChunks = this.setAudioChunks.bind(this);
+    this.startRecord = this.startRecord.bind(this);
+    this.stopRecord = this.stopRecord.bind(this);
   }
 
   public abstract getState(): ComposerState;
@@ -293,16 +284,16 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
 
   public abstract getAttachmentByIndex(idx: number): AttachmentRuntime;
 
-  public setRecorder(recording: MediaRecorder): void {
+  public startRecord(): void {
     const core = this._core.getState();
     if (!core) throw new Error("Composer is not available");
-    core.setRecorder(recording);
+    core.startRecord();
   }
 
-  public setAudioChunks(chunks: Blob[]): void {
+  public stopRecord(): void {
     const core = this._core.getState();
     if (!core) throw new Error("Composer is not available");
-    core.setAudioChunks(chunks);
+    core.stopRecord();
   }
 }
 

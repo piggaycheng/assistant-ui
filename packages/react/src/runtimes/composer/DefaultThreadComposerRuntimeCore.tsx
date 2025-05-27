@@ -3,11 +3,11 @@ import { AttachmentAdapter } from "../adapters/attachment";
 import { ThreadComposerRuntimeCore } from "../core/ComposerRuntimeCore";
 import { ThreadRuntimeCore } from "../core/ThreadRuntimeCore";
 import { BaseComposerRuntimeCore } from "./BaseComposerRuntimeCore";
+import { RecordAdapter } from "../adapters/record";
 
 export class DefaultThreadComposerRuntimeCore
   extends BaseComposerRuntimeCore
-  implements ThreadComposerRuntimeCore
-{
+  implements ThreadComposerRuntimeCore {
   private _canCancel = false;
   public get canCancel() {
     return this._canCancel;
@@ -23,7 +23,10 @@ export class DefaultThreadComposerRuntimeCore
 
   constructor(
     private runtime: Omit<ThreadRuntimeCore, "composer"> & {
-      adapters?: { attachments?: AttachmentAdapter | undefined } | undefined;
+      adapters?: {
+        attachments?: AttachmentAdapter | undefined;
+        record?: RecordAdapter | undefined;
+      } | undefined;
     },
   ) {
     super();
@@ -51,5 +54,9 @@ export class DefaultThreadComposerRuntimeCore
 
   public async handleCancel() {
     this.runtime.cancelRun();
+  }
+
+  protected getRecordAdapter() {
+    return this.runtime.adapters?.record;
   }
 }

@@ -3,6 +3,7 @@ import { getThreadMessageText } from "../../utils/getThreadMessageText";
 import { AttachmentAdapter } from "../adapters/attachment";
 import { ThreadRuntimeCore } from "../core/ThreadRuntimeCore";
 import { BaseComposerRuntimeCore } from "./BaseComposerRuntimeCore";
+import { RecordAdapter } from "../adapters/record";
 
 export class DefaultEditComposerRuntimeCore extends BaseComposerRuntimeCore {
   public get canCancel() {
@@ -19,7 +20,10 @@ export class DefaultEditComposerRuntimeCore extends BaseComposerRuntimeCore {
   private _sourceId;
   constructor(
     private runtime: ThreadRuntimeCore & {
-      adapters?: { attachments?: AttachmentAdapter | undefined } | undefined;
+      adapters?: {
+        attachments?: AttachmentAdapter | undefined;
+        record?: RecordAdapter | undefined;
+      } | undefined;
     },
     private endEditCallback: () => void,
     { parentId, message }: { parentId: string | null; message: ThreadMessage },
@@ -58,5 +62,9 @@ export class DefaultEditComposerRuntimeCore extends BaseComposerRuntimeCore {
   public handleCancel() {
     this.endEditCallback();
     this._notifySubscribers();
+  }
+
+  protected getRecordAdapter() {
+    return this.runtime.adapters?.record;
   }
 }

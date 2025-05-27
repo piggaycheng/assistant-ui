@@ -11,6 +11,7 @@ import {
 } from "../core/ComposerRuntimeCore";
 import { MessageRole, RunConfig } from "../../types/AssistantTypes";
 import { BaseSubscribable } from "../remote-thread-list/BaseSubscribable";
+import { RecordAdapter } from "../adapters/record";
 
 const isAttachmentComplete = (a: Attachment): a is CompleteAttachment =>
   a.status.type === "complete";
@@ -235,33 +236,17 @@ export abstract class BaseComposerRuntimeCore
     };
   }
 
-  private _recorder: MediaRecorder | undefined;
-  public get recorder(): MediaRecorder | undefined {
-    return this._recorder;
+  protected abstract getRecordAdapter(): RecordAdapter | undefined;
+
+  public startRecord() {
+    const adapter = this.getRecordAdapter();
+    if (!adapter) throw new Error("Recording is not supported");
+    adapter.start()
   }
 
-  public setRecorder(recording: MediaRecorder) {
-    this._recorder = recording;
-    this._notifySubscribers();
-  };
-
-  public removeRecorder() {
-    this._recorder = undefined;
-    this._notifySubscribers();
-  }
-
-  private _audioChunks: Blob[] = [];
-  public get audioChunks() {
-    return this._audioChunks;
-  }
-
-  public setAudioChunks(audioChunks: Blob[]) {
-    this._audioChunks = audioChunks;
-    this._notifySubscribers();
-  }
-
-  public resetAudioChunks() {
-    this._audioChunks = [];
-    this._notifySubscribers();
+  public stopRecord() {
+    const adapter = this.getRecordAdapter();
+    if (!adapter) throw new Error("Recording is not supported");
+    adapter.stop();
   }
 }

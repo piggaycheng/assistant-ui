@@ -6,6 +6,7 @@ import { SpeechSynthesisAdapter } from "../adapters/speech/SpeechAdapterTypes";
 import { ChatModelAdapter } from "./ChatModelAdapter";
 import { AssistantCloud } from "../../cloud";
 import { SuggestionAdapter } from "../adapters";
+import { RecordAdapter } from "../adapters/record";
 
 export type LocalRuntimeOptionsBase = {
   maxSteps?: number | undefined;
@@ -16,6 +17,7 @@ export type LocalRuntimeOptionsBase = {
     speech?: SpeechSynthesisAdapter | undefined;
     feedback?: FeedbackAdapter | undefined;
     suggestion?: SuggestionAdapter | undefined;
+    record?: RecordAdapter | undefined;
   };
 
   /**
