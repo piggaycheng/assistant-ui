@@ -246,8 +246,31 @@ export abstract class BaseComposerRuntimeCore
   }
 
   public stopRecord() {
+
     const adapter = this.getRecordAdapter();
     if (!adapter) throw new Error("Recording is not supported");
+
+    const callback = () => {
+      const audioBlob = adapter.getAudioBlob();
+
+      if (audioBlob) {
+        // const url = window.URL.createObjectURL(audioBlob);
+        // const a = document.createElement('a');
+        // a.style.display = 'none';
+        // a.href = url;
+        // a.download = 'test.webm';
+        // document.body.appendChild(a);
+        // a.click();
+        // document.body.removeChild(a);
+        // URL.revokeObjectURL(url)
+
+        adapter.sendAudio(audioBlob).then((response) => {
+          this.setText(response.text);
+        });
+      }
+    }
+    adapter.setOnStopCallback(callback);
+
     adapter.stop();
     this.setIsRecording(false);
   }
