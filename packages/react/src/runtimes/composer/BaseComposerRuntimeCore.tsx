@@ -238,15 +238,27 @@ export abstract class BaseComposerRuntimeCore
 
   protected abstract getRecordAdapter(): RecordAdapter | undefined;
 
-  public startRecord() {
+  public async startRecord() {
     const adapter = this.getRecordAdapter();
     if (!adapter) throw new Error("Recording is not supported");
-    adapter.start()
+    await adapter.start()
+    this.setIsRecording(true);
   }
 
   public stopRecord() {
     const adapter = this.getRecordAdapter();
     if (!adapter) throw new Error("Recording is not supported");
     adapter.stop();
+    this.setIsRecording(false);
+  }
+
+  private _isRecording = false;
+  public get isRecording() {
+    return this._isRecording;
+  }
+  protected setIsRecording(value: boolean) {
+    if (this._isRecording === value) return;
+    this._isRecording = value;
+    this._notifySubscribers();
   }
 }

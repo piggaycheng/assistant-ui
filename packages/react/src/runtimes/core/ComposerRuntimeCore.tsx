@@ -39,6 +39,7 @@ export type ComposerRuntimeCore = Readonly<{
 
   startRecord: () => void;
   stopRecord: () => void;
+  isRecording: boolean;
 }>;
 
 export type ThreadComposerRuntimeCore = ComposerRuntimeCore &

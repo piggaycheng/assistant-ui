@@ -15,11 +15,16 @@ const useComposerRecord = ({
   realtime?: boolean | undefined;
 } = {}) => {
   const disabled = useComposer((c) => !c.isEditing);
+  const isRecording = useComposer((c) => c.isRecording);
 
   const composerRuntime = useComposerRuntime();
   const callback = useCallback(() => {
+    if (isRecording) {
+      composerRuntime.stopRecord();
+      return;
+    }
     composerRuntime.startRecord()
-  }, [composerRuntime]);
+  }, [composerRuntime, isRecording]);
 
   if (disabled) return null;
   return callback;

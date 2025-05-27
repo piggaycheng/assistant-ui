@@ -11,6 +11,11 @@ export class SpeechRecordAdapter implements RecordAdapter {
       throw new Error("getUserMedia is not supported in this browser.");
     }
 
+    if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+      console.warn("MediaRecorder is already recording.");
+      return;
+    }
+
     this.audioChunks = [];
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     this.mediaRecorder = new MediaRecorder(this.stream);
@@ -26,14 +31,15 @@ export class SpeechRecordAdapter implements RecordAdapter {
       this.stream?.getTracks().forEach(track => track.stop());
     }
 
-    return {
-      stream: this.stream,
-      mediaRecorder: this.mediaRecorder,
-      audioChunks: this.audioChunks,
-    }
+    this.mediaRecorder.start();
   }
 
   stop() {
+    if (!this.mediaRecorder || this.mediaRecorder.state !== "recording") {
+      console.warn("MediaRecorder is not recording.");
+      return;
+    }
+
     this.mediaRecorder?.stop();
   }
 

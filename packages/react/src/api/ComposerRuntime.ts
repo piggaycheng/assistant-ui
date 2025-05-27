@@ -43,6 +43,8 @@ type BaseComposerState = {
   readonly role: MessageRole;
   readonly attachments: readonly Attachment[];
   readonly runConfig: RunConfig;
+
+  readonly isRecording: boolean;
 };
 
 export type ThreadComposerState = BaseComposerState & {
@@ -75,6 +77,8 @@ const getThreadComposerState = (
     runConfig: runtime?.runConfig ?? EMPTY_OBJECT,
 
     value: runtime?.text ?? "",
+
+    isRecording: runtime?.isRecording ?? false,
   });
 };
 
@@ -94,6 +98,8 @@ const getEditComposerState = (
     runConfig: runtime?.runConfig ?? EMPTY_OBJECT,
 
     value: runtime?.text ?? "",
+
+    isRecording: runtime?.isRecording ?? false,
   });
 };
 

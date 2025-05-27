@@ -1,7 +1,7 @@
 
 
 export type RecordAdapter = {
-  start: () => void;
+  start: () => Promise<void>;
   stop: () => void;
   getAudioBlob: () => Blob | undefined;
 };
