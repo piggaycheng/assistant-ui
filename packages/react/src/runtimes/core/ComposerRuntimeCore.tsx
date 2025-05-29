@@ -40,6 +40,9 @@ export type ComposerRuntimeCore = Readonly<{
   startRecord: () => void;
   stopRecord: () => void;
   isRecording: boolean;
+  setStartVisualizerRecording: (fn: () => void) => void;
+  setStopVisualizerRecording: (fn: () => void) => void;
+  getSpeechToText: () => (((audioBlob: Blob) => Promise<string>) | undefined);
 }>;
 
 export type ThreadComposerRuntimeCore = ComposerRuntimeCore &

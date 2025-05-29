@@ -6,3 +6,4 @@ export { ComposerPrimitiveAddAttachment as AddAttachment } from "./ComposerAddAt
 export { ComposerPrimitiveAttachments as Attachments } from "./ComposerAttachments";
 export { ComposerPrimitiveIf as If } from "./ComposerIf";
 export { ComposerPrimitiveRecord as Record } from "./ComposerRecord"
+export { ComposerPrimitiveRecordVisualizer as RecordVisualizer } from "./ComposerRecordVisualizer";

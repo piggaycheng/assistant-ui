@@ -1,2 +1,2 @@
-export type { RecordAdapter } from "./RecordAdapterType";
+export type { RecordAdapter, AudioResponse } from "./RecordAdapterType";
 export { SpeechRecordAdapter } from "./RecordAdapter";

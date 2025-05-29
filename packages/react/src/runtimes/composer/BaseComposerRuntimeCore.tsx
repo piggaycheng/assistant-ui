@@ -241,38 +241,28 @@ export abstract class BaseComposerRuntimeCore
   public async startRecord() {
     const adapter = this.getRecordAdapter();
     if (!adapter) throw new Error("Recording is not supported");
+    adapter.setOnStopRecording(this._onRecordingStop.bind(this));
     await adapter.start()
     this.setIsRecording(true);
   }
 
   public stopRecord() {
-
     const adapter = this.getRecordAdapter();
     if (!adapter) throw new Error("Recording is not supported");
-
-    const callback = () => {
-      const audioBlob = adapter.getAudioBlob();
-
-      if (audioBlob) {
-        // const url = window.URL.createObjectURL(audioBlob);
-        // const a = document.createElement('a');
-        // a.style.display = 'none';
-        // a.href = url;
-        // a.download = 'test.webm';
-        // document.body.appendChild(a);
-        // a.click();
-        // document.body.removeChild(a);
-        // URL.revokeObjectURL(url)
-
-        adapter.sendAudio(audioBlob).then((response) => {
-          this.setText(response.text);
-        });
-      }
-    }
-    adapter.setOnStopCallback(callback);
-
     adapter.stop();
     this.setIsRecording(false);
+  }
+
+  private _onRecordingStop(audioBlob: Blob): void {
+    const adapter = this.getRecordAdapter();
+    if (!adapter) throw new Error("Recording is not supported");
+    if (!adapter.getSpeechToText) {
+      console.warn("Speech to text is not supported by the recording adapter");
+      return;
+    }
+    adapter.getSpeechToText()?.(audioBlob).then((text) => {
+      this.setText(text);
+    })
   }
 
   private _isRecording = false;
@@ -283,5 +273,23 @@ export abstract class BaseComposerRuntimeCore
     if (this._isRecording === value) return;
     this._isRecording = value;
     this._notifySubscribers();
+  }
+
+  public setStartVisualizerRecording(fn: () => void) {
+    const adapter = this.getRecordAdapter();
+    if (!adapter) return;
+    adapter.setStartVisualizerRecording?.(fn);
+  }
+
+  public setStopVisualizerRecording(fn: () => void) {
+    const adapter = this.getRecordAdapter();
+    if (!adapter) return;
+    adapter.setStopVisualizerRecording?.(fn);
+  }
+
+  public getSpeechToText() {
+    const adapter = this.getRecordAdapter();
+    if (!adapter) return undefined;
+    return adapter.getSpeechToText();
   }
 }

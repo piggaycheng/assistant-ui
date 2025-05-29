@@ -1,84 +1,84 @@
-import { RecordAdapter, AudioResponse } from "./RecordAdapterType";
+import { RecordAdapter } from "./RecordAdapterType";
 
 export class SpeechRecordAdapter implements RecordAdapter {
-  private stream?: MediaStream;
-  private mediaRecorder?: MediaRecorder;
-  private audioChunks: Blob[] = [];
-  private audioBlob?: Blob;
-  private onStopCallback?: () => void;
-  private speechRecognitionUrl?: string | undefined;
+  private _stream: MediaStream | undefined;
+  private _mediaRecorder: MediaRecorder | undefined;
+  private _audioChunks: Blob[] = [];
+  private _audioBlob: Blob | undefined;
+  private _onStopRecording: ((audioBlob: Blob) => void) | undefined;
+  private _speechToText: ((audioBlob: Blob) => Promise<string>) | undefined;
+  private _startVisualizerRecording: (() => void) | undefined;
+  private _stopVisualizerRecording: (() => void) | undefined;
 
-  constructor(speechRecognitionUrl?: string) {
-    this.speechRecognitionUrl = speechRecognitionUrl;
+  constructor(
+    speechToText?: (audioBlob: Blob) => Promise<string>,
+  ) {
+    this._speechToText = speechToText;
   }
 
   async start() {
+    if (this._startVisualizerRecording) {
+      this._startVisualizerRecording();
+      return;
+    }
+
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error("getUserMedia is not supported in this browser.");
     }
 
-    if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+    if (this._mediaRecorder && this._mediaRecorder.state === "recording") {
       console.warn("MediaRecorder is already recording.");
       return;
     }
 
-    this.audioChunks = [];
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    this.mediaRecorder = new MediaRecorder(this.stream);
+    this._audioChunks = [];
+    this._stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    this._mediaRecorder = new MediaRecorder(this._stream);
 
-    this.mediaRecorder.ondataavailable = (event) => {
+    this._mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
-        this.audioChunks.push(event.data);
+        this._audioChunks.push(event.data);
       }
     };
 
-    this.mediaRecorder.onstop = () => {
-      this.audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-      this.stream?.getTracks().forEach(track => track.stop());
+    this._mediaRecorder.onstop = () => {
+      this._audioBlob = new Blob(this._audioChunks, { type: 'audio/webm' });
+      this._stream?.getTracks().forEach(track => track.stop());
 
-      if (this.onStopCallback) {
-        this.onStopCallback();
-      }
+      this._onStopRecording?.(this._audioBlob);
     }
 
-    this.mediaRecorder.start();
+    this._mediaRecorder.start();
   }
 
   stop() {
-    if (!this.mediaRecorder || this.mediaRecorder.state !== "recording") {
+    if (this._stopVisualizerRecording) {
+      this._stopVisualizerRecording();
+      return;
+    }
+
+    if (!this._mediaRecorder || this._mediaRecorder.state !== "recording") {
       console.warn("MediaRecorder is not recording.");
       return;
     }
 
-    this.mediaRecorder?.stop();
+    this._mediaRecorder?.stop();
   }
 
-  setOnStopCallback(callback: () => void) {
-    this.onStopCallback = callback;
+  setOnStopRecording(callback: (audioBlob: Blob) => void) {
+    this._onStopRecording = callback;
   }
 
-  getAudioBlob(): Blob | undefined {
-    return this.audioBlob;
+  getSpeechToText() {
+    return this._speechToText;
   }
 
-  async sendAudio(audioBlob: Blob) {
-    if (!this.speechRecognitionUrl) {
-      throw new Error("Speech recognition URL is not set.");
-    }
+  setStartVisualizerRecording(fn: () => void) {
+    this._startVisualizerRecording = fn;
+  }
 
-    const formData = new FormData();
-    formData.append("audio_blob", audioBlob, "recording.webm");
-
-    const response = await fetch(this.speechRecognitionUrl, {
-      method: "POST",
-      body: formData,
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to send audio: ${response.statusText}`);
-    }
-
-    const result: AudioResponse = await response.json();
-    return result; // Assuming the API returns some result
+  setStopVisualizerRecording(fn: () => void) {
+    this._stopVisualizerRecording = fn;
   }
 }
 

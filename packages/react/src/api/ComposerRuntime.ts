@@ -179,6 +179,9 @@ export type ComposerRuntime = {
 
   startRecord(): void;
   stopRecord(): void;
+  setStartVisualizerRecording(fn: () => void): void;
+  setStopVisualizerRecording(fn: () => void): void;
+  getSpeechToText(): (((audioBlob: Blob) => Promise<string>) | undefined);
 };
 
 export abstract class ComposerRuntimeImpl implements ComposerRuntime {
@@ -206,6 +209,9 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
     this.unstable_on = this.unstable_on.bind(this);
     this.startRecord = this.startRecord.bind(this);
     this.stopRecord = this.stopRecord.bind(this);
+    this.setStartVisualizerRecording = this.setStartVisualizerRecording.bind(this);
+    this.setStopVisualizerRecording = this.setStopVisualizerRecording.bind(this);
+    this.getSpeechToText = this.getSpeechToText.bind(this);
   }
 
   public abstract getState(): ComposerState;
@@ -300,6 +306,24 @@ export abstract class ComposerRuntimeImpl implements ComposerRuntime {
     const core = this._core.getState();
     if (!core) throw new Error("Composer is not available");
     core.stopRecord();
+  }
+
+  public setStartVisualizerRecording(fn: () => void) {
+    const core = this._core.getState();
+    if (!core) throw new Error("Composer is not available");
+    core.setStartVisualizerRecording(fn);
+  }
+
+  public setStopVisualizerRecording(fn: () => void) {
+    const core = this._core.getState();
+    if (!core) throw new Error("Composer is not available");
+    core.setStopVisualizerRecording(fn);
+  }
+
+  public getSpeechToText() {
+    const core = this._core.getState();
+    if (!core) throw new Error("Composer is not available");
+    return core.getSpeechToText();
   }
 }
 
