@@ -1,9 +1,9 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useMemo } from "react";
 
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
-import { useComposerRuntime } from "../../context";
+import { useComposerRuntime, useComposer } from "../../context";
 
 export const ComposerPrimitiveRecordVisualizer: FC = () => {
   const [isWindowReady, setIsWindowReady] = useState(false);
@@ -15,6 +15,11 @@ export const ComposerPrimitiveRecordVisualizer: FC = () => {
   } = recorderControls;
 
   const composerRuntime = useComposerRuntime();
+  const isRecording = useComposer((c) => c.isRecording);
+
+  const isShow = useMemo(() => {
+    return isWindowReady && isRecording;
+  }, [isRecording, isWindowReady]);
 
   useEffect(() => {
     composerRuntime.setStartVisualizerRecording(startRecording);
@@ -42,7 +47,14 @@ export const ComposerPrimitiveRecordVisualizer: FC = () => {
 
   return (
     <>
-      {isWindowReady && <VoiceVisualizer controls={recorderControls} backgroundColor="#333" />}
+      {isShow && <VoiceVisualizer
+        controls={recorderControls}
+        backgroundColor="#333"
+        isControlPanelShown={false}
+        isDefaultUIShown={false}
+        onlyRecording
+        mainContainerClassName="w-full rounded-lg overflow-hidden"
+        height={50} />}
     </>
   )
 }
