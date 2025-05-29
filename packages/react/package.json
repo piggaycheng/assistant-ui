@@ -68,6 +68,7 @@
     "json-schema": "^0.4.0",
     "nanoid": "5.1.5",
     "react-textarea-autosize": "^8.5.9",
+    "react-voice-visualizer": "^2.0.8",
     "zod": "^3.25.28",
     "zustand": "^5.0.5"
   },
