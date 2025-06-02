@@ -117,6 +117,28 @@ export const EMPTY_THREAD_CORE: ThreadRuntimeCore = {
     unstable_on() {
       return () => {};
     },
+
+    startRecord() {
+      throw EMPTY_THREAD_ERROR;
+    },
+
+    stopRecord() {
+      throw EMPTY_THREAD_ERROR;
+    },
+
+    isRecording: false,
+
+    setStartVisualizerRecording() {
+      throw EMPTY_THREAD_ERROR;
+    },
+
+    setStopVisualizerRecording() {
+      throw EMPTY_THREAD_ERROR;
+    },
+
+    getSpeechToText() {
+      return undefined;
+    },
   },
 
   getEditComposer() {
